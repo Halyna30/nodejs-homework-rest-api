@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const { validationResult, query } = require("express-validator");
 const {
   listContacts,
   getContactById,
@@ -8,14 +7,10 @@ const {
   addContact,
   updateContact,
 } = require("../../model/index.js");
-
-const validator = (req, res, next) => {
-  const error = validationResult(req);
-  if (!error.isEmpty()) {
-    return res.status(400).json({ error: error.array() });
-  }
-  next();
-};
+const {
+  validateCreateContact,
+  validateUpdateContact,
+  } = require("./validation");
 
 router.get("/", async (req, res, next) => {
   try {
@@ -45,7 +40,7 @@ router.get("/:contactId", async (req, res, next) => {
   }
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/",validateCreateContact, async (req, res, next) => {
   try {
     const newContact = await addContact(req.body);
 
@@ -78,7 +73,7 @@ router.delete(
 );
 
 router.put(
-  "/:contactId",
+  "/:contactId",validateUpdateContact,
   async (req, res, next) => {
     try {
       const { contactId } = req.params;
