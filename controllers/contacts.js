@@ -1,32 +1,20 @@
-const express = require("express");
-const router = express.Router();
-const {
-  getAll,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContact,
-} = require("../../model/index.js");
-const {
-  validateCreateContact,
-  validateUpdateContact,
-} = require("./validation");
+const Contacts = require("../model/index.js");
 
-router.get("/", async (req, res, next) => {
+const getAll = async (req, res, next) => {
   try {
-    const response = await getAll();
+    const response = await Contacts.getAll();
     return res
       .status(200)
       .json({ status: "success", code: 200, data: { response } });
   } catch (e) {
     next(e);
   }
-});
+};
 
-router.get("/:contactId", async (req, res, next) => {
+const getById = async (req, res, next) => {
   try {
     const { contactId } = req.params;
-    const contact = await getContactById(contactId);
+    const contact = await Contacts.getContactById(contactId);
     if (contact) {
       return res
         .status(200)
@@ -38,11 +26,11 @@ router.get("/:contactId", async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-});
+};
 
-router.post("/", validateCreateContact, async (req, res, next) => {
+const addContact = async (req, res, next) => {
   try {
-    const newContact = await addContact(req.body);
+    const newContact = await Contacts.addContact(req.body);
 
     return res
       .status(201)
@@ -50,12 +38,12 @@ router.post("/", validateCreateContact, async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-});
+};
 
-router.delete("/:contactId", async (req, res, next) => {
+const removeContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
-    const contact = await removeContact(contactId);
+    const contact = await Contacts.removeContact(contactId);
     if (contact) {
       return res
         .status(200)
@@ -67,12 +55,12 @@ router.delete("/:contactId", async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-});
+};
 
-router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
+const updateContact = async (req, res, next) => {
   try {
     const { contactId } = req.params;
-    const newContact = await updateContact(contactId, req.body);
+    const newContact = await Contacts.updateContact(contactId, req.body);
     if (newContact) {
       return res
         .status(200)
@@ -84,6 +72,12 @@ router.put("/:contactId", validateUpdateContact, async (req, res, next) => {
   } catch (e) {
     next(e);
   }
-});
+};
 
-module.exports = router;
+module.exports = {
+  getAll,
+  getById,
+  addContact,
+  removeContact,
+  updateContact,
+};
