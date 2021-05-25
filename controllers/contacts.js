@@ -2,7 +2,8 @@ const Contacts = require("../model/index.js");
 
 const getAll = async (req, res, next) => {
   try {
-    const response = await Contacts.getAll();
+    const userId = req.user.id;
+    const response = await Contacts.getAll(userId);
     return res
       .status(200)
       .json({ status: "success", code: 200, data: { response } });
@@ -13,8 +14,9 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
+    const userId = req.user.id;
     const { contactId } = req.params;
-    const contact = await Contacts.getContactById(contactId);
+    const contact = await Contacts.getContactById(userId, contactId);
     if (contact) {
       return res
         .status(200)
@@ -28,10 +30,16 @@ const getById = async (req, res, next) => {
   }
 };
 
-const addContact = async (req, res, next) => {
+const create = async (req, res, next) => {
   try {
-    const newContact = await Contacts.addContact(req.body);
+    const userId = req.user.id;
 
+    const newContact = await Contacts.addContact({
+      ...req.body,
+      owner: userId,
+    });
+
+    console.log(newContact);
     return res
       .status(201)
       .json({ status: "success", code: 201, data: { newContact } });
@@ -42,8 +50,9 @@ const addContact = async (req, res, next) => {
 
 const removeContact = async (req, res, next) => {
   try {
+    const userId = req.user.id;
     const { contactId } = req.params;
-    const contact = await Contacts.removeContact(contactId);
+    const contact = await Contacts.removeContact(userId, contactId);
     if (contact) {
       return res
         .status(200)
@@ -59,8 +68,13 @@ const removeContact = async (req, res, next) => {
 
 const updateContact = async (req, res, next) => {
   try {
+    const userId = req.user.id;
     const { contactId } = req.params;
-    const newContact = await Contacts.updateContact(contactId, req.body);
+    const newContact = await Contacts.updateContact(
+      userId,
+      contactId,
+      req.body
+    );
     if (newContact) {
       return res
         .status(200)
@@ -77,7 +91,7 @@ const updateContact = async (req, res, next) => {
 module.exports = {
   getAll,
   getById,
-  addContact,
+  create,
   removeContact,
   updateContact,
 };

@@ -7,12 +7,12 @@ const contactSchema = new Schema(
       type: String,
       minlength: 2,
       maxlength: 30,
-      required: [true, "Set name for contact"],
+      // required: [true, "Set name for contact"],
     },
     email: {
       type: String,
       unique: true,
-      required: [true, "Set unique email"],
+      // required: [true, "Set unique email"],
     },
     phone: {
       type: String,
