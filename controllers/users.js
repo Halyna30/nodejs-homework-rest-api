@@ -60,10 +60,37 @@ const login = async (req, res, next) => {
   }
 };
 
-const logout = async (req, res, next) => {};
+const logout = async (req, res, next) => {
+  await Users.updateToken(req.user.id, null);
+  return res.status(HttpCode.NO_CONTENT).json({});
+};
+
+const getCurrent = async (req, res, next) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: "error",
+        code: HttpCode.UNAUTHORIZED,
+        message: "Not authorized",
+      });
+    }
+    return res.status(HttpCode.OK).json({
+      status: "success",
+      code: HttpCode.OK,
+      data: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    });
+  } catch (e) {
+    next(e);
+  }
+};
 
 module.exports = {
   reg,
   login,
   logout,
+  getCurrent,
 };

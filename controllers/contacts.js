@@ -3,10 +3,15 @@ const Contacts = require("../model/index.js");
 const getAll = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const response = await Contacts.getAll(userId);
-    return res
-      .status(200)
-      .json({ status: "success", code: 200, data: { response } });
+    const { contacts, total, limit, offset } = await Contacts.getAll(
+      userId,
+      req.query
+    );
+    return res.status(200).json({
+      status: "success",
+      code: 200,
+      data: { total, limit, offset, contacts },
+    });
   } catch (e) {
     next(e);
   }
