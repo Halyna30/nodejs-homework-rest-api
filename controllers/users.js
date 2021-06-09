@@ -1,9 +1,20 @@
 const jwt = require("jsonwebtoken");
 const Users = require("../model/user.js");
+const cloudinary = require("cloudinary").v2;
+const { promisify } = require("util");
 const { HttpCode } = require("../helpers/constants");
 
 require("dotenv").config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+// const AVATARS_OF_USERS = process.env.AVATARS_OF_USERS;
+// const UploadAvatar = require("../services/uploads-avatars-local");
+const UploadAvatar = require("../services/uploads-avatars-cloud");
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 const reg = async (req, res, next) => {
   try {
@@ -16,7 +27,7 @@ const reg = async (req, res, next) => {
       });
     }
     const newUser = await Users.create(req.body);
-    const { id, email, subscription } = newUser;
+    const { id, email, subscription, avatar } = newUser;
     return res.status(HttpCode.CREATED).json({
       status: "success",
       code: HttpCode.CREATED,
@@ -24,6 +35,7 @@ const reg = async (req, res, next) => {
         id,
         email,
         subscription,
+        avatar,
       },
     });
   } catch (e) {
@@ -88,9 +100,38 @@ const getCurrent = async (req, res, next) => {
   }
 };
 
+const avatars = async (req, res, next) => {
+  try {
+    const id = req.user.id;
+    // const uploads = new UploadAvatar(AVATARS_OF_USERS);
+    // const avatarUrl = await uploads.saveAvatarToStatic({
+    //   idUser: id,
+    //   pathFile: req.file.path,
+    //   name: req.file.filename,
+    //   oldFile: req.user.avatar,
+    // });
+    const uploadCloud = promisify(cloudinary.uploader.upload);
+    const uploads = new UploadAvatar(uploadCloud);
+    const { userIdImg, avatarUrl } = await uploads.saveAvatarToCloud(
+      req.file.path,
+      req.user.userIdImg
+    );
+    await Users.updateAvatar(id, avatarUrl, userIdImg);
+
+    return res.json({
+      status: "success",
+      code: HttpCode.OK,
+      data: { avatarUrl },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   reg,
   login,
   logout,
   getCurrent,
+  avatars,
 };
