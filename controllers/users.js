@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
-const Users = require("../model/user.js");
 const cloudinary = require("cloudinary").v2;
 const { promisify } = require("util");
 const { HttpCode } = require("../helpers/constants");
+const Users = require("../model/user.js");
 
 require("dotenv").config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
@@ -170,6 +170,7 @@ const verify = async (req, res, next) => {
     next(error);
   }
 };
+
 const repeatSendEmailVerify = async (req, res, next) => {
   const user = await Users.findByEmail(req.body.email);
   if (user) {
